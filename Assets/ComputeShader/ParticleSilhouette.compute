@@ -1,0 +1,52 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+// Particle's data
+struct Particle
+{
+	float3 position;
+	float3 velocity;
+};
+
+// Particle's data, shared with the shader
+RWStructuredBuffer<Particle> particleBuffer;
+Texture2D<float3> grayTexture;
+Texture2D<float3> videoTexture;
+//RWTexture2D<float4> outputTexture;
+
+// Variables set from the CPU
+float deltaTime;
+int width;
+int height;
+
+[numthreads(1, 1, 1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+	float3 delta = float3((float(-width / 2) + id.x * 10) * 0.1f, (float(-height / 2) + id.y * 10) * 0.1f, 0) - particleBuffer[id.x + id.y * (width / 10)].position;
+	if (grayTexture[int2(id.x * 10, id.y * 10)].x > 0.1f)
+	{
+		delta = float3((float(-width / 2) + id.x * 10) * 0.1f, (float(-height / 2) + id.y * 10) * 0.1f, -(0.2126f * videoTexture[int2(id.x * 10, id.y * 10)].x + 0.7152f * videoTexture[int2(id.x * 10, id.y * 10)].y + 0.0722f * videoTexture[int2(id.x * 10, id.y * 10)].z) * 5) - particleBuffer[id.x + id.y * (width / 10)].position;
+		float3 dir = normalize(delta);
+		float sqlength = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+
+		particleBuffer[id.x + id.y * (width / 10)].velocity += 0.2f * sqlength * dir;
+		particleBuffer[id.x + id.y * (width / 10)].position += particleBuffer[id.x + id.y * (width / 10)].velocity * deltaTime;
+	}
+	else
+	{
+		float3 dir = normalize(delta);
+		float sqlength = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+
+		particleBuffer[id.x + id.y * (width / 10)].velocity = 0.5f * sqlength * dir;
+		particleBuffer[id.x + id.y * (width / 10)].position += particleBuffer[id.x + id.y * (width / 10)].velocity * deltaTime;
+	}
+	
+	/*if (grayTexture[id.xy].x == 1.0f)
+	{
+		particleBuffer[id.x + id.y * width].position = float3(particleBuffer[id.x + id.y * width].initialPosition.xy, -(0.2126f * videoTexture[id.xy].x + 0.7152f * videoTexture[id.xy].y + 0.0722f * videoTexture[id.xy].z) * 10);
+	}
+	else
+	{
+		particleBuffer[id.x + id.y * width].position = particleBuffer[id.x + id.y * width].initialPosition;
+	}*/
+}
