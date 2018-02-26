@@ -84,57 +84,55 @@ Shader "Particle"
 				if (p[0].instance - _Width >= 0)
 					p5 = UnityObjectToClipPos(float4(particleBuffer[p[0].instance - _Width].position, 1.0f));
 				PS_INPUT pIN;
-				float4 pc = p4 * 0.25f + p1 * 0.5f + p2 * 0.25f;
-				float4 tmpP1 = 2 * pc - p4 / 2 - p2 / 2;
 
 				pIN.position = p1;
 				pIN.color = p[0].color;
 				pIN.instance = p[0].instance;
 				triStream.Append(pIN);
 
-				pIN.position = p4 * (0.625 * 0.625) + tmpP1 * 2 * 0.125 *(1 - 0.625) + p2 * (1 - 0.625) * (1 - 0.625);
-				pIN.color = p[0].color;
-				pIN.instance = p[0].instance + 1;
-				triStream.Append(pIN);
+				if (p4.x != p[0].position.x || p4.y != p[0].position.y)
+				{
+					float4 pc = p4 * 0.25f + p1 * 0.5f + p2 * 0.25f;
+					float4 tmpP1 = 2 * pc - p4 / 2 - p2 / 2;
 
-				pIN.position = p4 * (0.75 * 0.75) + tmpP1 * 2 * 0.75 *(1 - 0.75) + p2 * (1 - 0.75) * (1 - 0.75);
-				pIN.color = p[0].color;
-				pIN.instance = p[0].instance + 1;
-				triStream.Append(pIN);
+					pIN.position = p4 * (0.6 * 0.6) + tmpP1 * 2 * 0.6 *(1 - 0.6) + p2 * (1 - 0.6) * (1 - 0.6);
+					triStream.Append(pIN);
 
-				pIN.position = p4 * (0.875 * 0.875) + tmpP1 * 2 * 0.875 *(1 - 0.875) + p2 * (1 - 0.875) * (1 - 0.875);
-				pIN.color = p[0].color;
-				pIN.instance = p[0].instance + 1;
-				triStream.Append(pIN);
+					pIN.position = p4 * (0.7 * 0.7) + tmpP1 * 2 * 0.7 *(1 - 0.7) + p2 * (1 - 0.7) * (1 - 0.7);
+					triStream.Append(pIN);
 
+					pIN.position = p4 * (0.8 * 0.8) + tmpP1 * 2 * 0.8 *(1 - 0.8) + p2 * (1 - 0.8) * (1 - 0.8);
+					triStream.Append(pIN);
+
+					pIN.position = p4 * (0.9 * 0.9) + tmpP1 * 2 * 0.9 *(1 - 0.9) + p2 * (1 - 0.9) * (1 - 0.9);
+					triStream.Append(pIN);
+				}
 				pIN.position = p2;
 				pIN.instance = p[0].instance + 1;
 				triStream.Append(pIN);
 
 				triStream.RestartStrip();
 
-				pc = p5 * 0.25f + p1 * 0.5f + p3 * 0.25f;
-				tmpP1 = 2 * pc - p5 / 2 - p3 / 2;
-
 				pIN.position = p1;
 				pIN.instance = p[0].instance;
 				triStream.Append(pIN);
 
-				pIN.position = p5 * (0.625 * 0.625) + tmpP1 * 2 * 0.125 *(1 - 0.625) + p3 * (1 - 0.625) * (1 - 0.625);
-				pIN.color = p[0].color;
-				pIN.instance = p[0].instance + 1;
-				triStream.Append(pIN);
+				if (p5.x != p[0].position.x || p5.y != p[0].position.y)
+				{
+					float4 pc = p5 * 0.25f + p1 * 0.5f + p3 * 0.25f;
+					float4 tmpP1 = 2 * pc - p5 / 2 - p3 / 2;
+					pIN.position = p4 * (0.6 * 0.6) + tmpP1 * 2 * 0.6 *(1 - 0.6) + p2 * (1 - 0.6) * (1 - 0.6);
+					triStream.Append(pIN);
 
-				pIN.position = p5 * (0.75 * 0.75) + tmpP1 * 2 * 0.75 *(1 - 0.75) + p3 * (1 - 0.75) * (1 - 0.75);
-				pIN.color = p[0].color;
-				pIN.instance = p[0].instance + 1;
-				triStream.Append(pIN);
+					pIN.position = p4 * (0.7 * 0.7) + tmpP1 * 2 * 0.7 *(1 - 0.7) + p2 * (1 - 0.7) * (1 - 0.7);
+					triStream.Append(pIN);
 
-				pIN.position = p5 * (0.875 * 0.875) + tmpP1 * 2 * 0.875 *(1 - 0.875) + p3 * (1 - 0.875) * (1 - 0.875);
-				pIN.color = p[0].color;
-				pIN.instance = p[0].instance + 1;
-				triStream.Append(pIN);
+					pIN.position = p4 * (0.8 * 0.8) + tmpP1 * 2 * 0.8 *(1 - 0.8) + p2 * (1 - 0.8) * (1 - 0.8);
+					triStream.Append(pIN);
 
+					pIN.position = p4 * (0.9 * 0.9) + tmpP1 * 2 * 0.9 *(1 - 0.9) + p2 * (1 - 0.9) * (1 - 0.9);
+					triStream.Append(pIN);
+				}
 				pIN.position = p3;
 				pIN.instance = p[0].instance + _Width;
 				triStream.Append(pIN);
