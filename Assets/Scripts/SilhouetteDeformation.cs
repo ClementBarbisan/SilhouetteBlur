@@ -80,6 +80,7 @@ public class SilhouetteDeformation : MonoBehaviour {
             texture.LoadRawTextureData(returnedResultVideo);
             texture.Apply();
         }
+        renderer.material.SetFloat("time", Time.time);
     }
     void OnDestroy()
     {
