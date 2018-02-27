@@ -150,7 +150,7 @@ Shader "Particle"
 					pIN.position = p1;
 					triStream.Append(pIN);
 
-					if (p[0].instance - _Width > 0)
+					if (p[0].instance - _Width >= 0)
 					{
 						float4 p5 = UnityObjectToClipPos(float4(particleBuffer[p[0].instance - _Width].position, 1.0f));
 						float4 pc = p5 * 0.25f + p1 * 0.5f + p3 * 0.25f;
