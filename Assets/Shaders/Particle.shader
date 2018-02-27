@@ -67,7 +67,7 @@ Shader "Particle"
 				return o;
 			}
 
-			[maxvertexcount(10)]
+			[maxvertexcount(16)]
 			void geom(point PS_INPUT p[1], inout LineStream<PS_INPUT> triStream)
 			{
 				float4 p1 = p[0].position;
@@ -79,7 +79,7 @@ Shader "Particle"
 					p2 = UnityObjectToClipPos(float4(particleBuffer[p[0].instance + 1].position, 1.0f));
 				if (p[0].instance + _Width < _Width * _Height)
 					p3 = UnityObjectToClipPos(float4(particleBuffer[p[0].instance + _Width].position, 1.0f));
-				if (p[0].instance - 1 >= 0)
+				if (p[0].instance - 1 >= 0 && (p[0].instance - 1) % _Width != 0)
 					p4 = UnityObjectToClipPos(float4(particleBuffer[p[0].instance - 1].position, 1.0f));
 				if (p[0].instance - _Width >= 0)
 					p5 = UnityObjectToClipPos(float4(particleBuffer[p[0].instance - _Width].position, 1.0f));
@@ -121,16 +121,16 @@ Shader "Particle"
 				{
 					float4 pc = p5 * 0.25f + p1 * 0.5f + p3 * 0.25f;
 					float4 tmpP1 = 2 * pc - p5 / 2 - p3 / 2;
-					pIN.position = p4 * (0.6 * 0.6) + tmpP1 * 2 * 0.6 *(1 - 0.6) + p2 * (1 - 0.6) * (1 - 0.6);
+					pIN.position = p5 * (0.6 * 0.6) + tmpP1 * 2 * 0.6 *(1 - 0.6) + p3 * (1 - 0.6) * (1 - 0.6);
 					triStream.Append(pIN);
 
-					pIN.position = p4 * (0.7 * 0.7) + tmpP1 * 2 * 0.7 *(1 - 0.7) + p2 * (1 - 0.7) * (1 - 0.7);
+					pIN.position = p5 * (0.7 * 0.7) + tmpP1 * 2 * 0.7 *(1 - 0.7) + p3 * (1 - 0.7) * (1 - 0.7);
 					triStream.Append(pIN);
 
-					pIN.position = p4 * (0.8 * 0.8) + tmpP1 * 2 * 0.8 *(1 - 0.8) + p2 * (1 - 0.8) * (1 - 0.8);
+					pIN.position = p5 * (0.8 * 0.8) + tmpP1 * 2 * 0.8 *(1 - 0.8) + p3 * (1 - 0.8) * (1 - 0.8);
 					triStream.Append(pIN);
 
-					pIN.position = p4 * (0.9 * 0.9) + tmpP1 * 2 * 0.9 *(1 - 0.9) + p2 * (1 - 0.9) * (1 - 0.9);
+					pIN.position = p5 * (0.9 * 0.9) + tmpP1 * 2 * 0.9 *(1 - 0.9) + p3 * (1 - 0.9) * (1 - 0.9);
 					triStream.Append(pIN);
 				}
 				pIN.position = p3;

@@ -69,8 +69,8 @@
 				if (greyImage.x > 0.01)
 				{
 					fixed4 deform = tex2D(_DeformationTex, i.uv);
-					float x = (sin(col.x * time.y) * sin(col.y * time.y)) / 1.2;
-					float y = cos(col.z * time.y) / 1.2;
+					float x = (sin(col.x * time) * sin(col.y * time)) / 1.2;
+					float y = cos(col.z * time) / 1.2;
 					i.uv += (greyImage.x / 1.2) * float2(deform.x * x, deform.y * y);
 					col = tex2D(_MainTex, i.uv);
 				}
