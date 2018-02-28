@@ -74,6 +74,17 @@ public class MeshSilhouette : MonoBehaviour {
                 particleArray[(i / 20) * (width / 20) + (j / 20)].velocity.x = 0;
                 particleArray[(i / 20) * (width / 20) + (j / 20)].velocity.y = 0;
                 particleArray[(i / 20) * (width / 20) + (j / 20)].velocity.z = 0;
+                if (i == height / 2 && j == width / 2)
+                {
+                    computeShader.SetInt("halfIndex", (i / 20) * (width / 20) + (j / 20));
+                    particleArray[(i / 20) * (width / 20) + (j / 20)].position.x = 0.001f;
+                    particleArray[(i / 20) * (width / 20) + (j / 20)].position.y = 0.001f;
+                    particleArray[(i / 20) * (width / 20) + (j / 20)].position.z = 0;
+
+                    particleArray[(i / 20) * (width / 20) + (j / 20)].velocity.x = 0;
+                    particleArray[(i / 20) * (width / 20) + (j / 20)].velocity.y = 0;
+                    particleArray[(i / 20) * (width / 20) + (j / 20)].velocity.z = 0;
+                }
             }
         }
         // Create the ComputeBuffer holding the Particles

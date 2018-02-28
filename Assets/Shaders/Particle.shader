@@ -37,7 +37,7 @@ Shader "Particle"
 			{
 				float4 position : SV_POSITION;
 				float4 color : COLOR;
-				int instance : ID;
+				int instance : SV_InstanceID;
 			};
 			
 			// Particle's data, shared with the compute shader
@@ -62,7 +62,7 @@ Shader "Particle"
 
 				// Position
 				o.position = UnityObjectToClipPos(float4(particleBuffer[instance_id].position, 1.0f));
-				o.instance = instance_id;
+				o.instance = int(instance_id);
 				return o;
 			}
 
@@ -122,8 +122,8 @@ Shader "Particle"
 				{
 					float4 p2 = UnityObjectToClipPos(float4(particleBuffer[p[0].instance + 1].position, 1.0f));
 					float4 ab = p2 - p1;
-					float4 height = float4(ab.y, -ab.x, 0, 0);
-					height = normalize(height);
+					float4 height = float4(0, 0, 0, 0);
+					height = normalize(float4(ab.y, -ab.x, 0, 0));
 
 					height.x /= (_ScreenParams.x / _ScreenParams.y);
 					pIN.position = p1 - height * size;
@@ -163,8 +163,8 @@ Shader "Particle"
 				{
 					float4 p3 = UnityObjectToClipPos(float4(particleBuffer[p[0].instance + _Width].position, 1.0f));
 					float4 ab = p3 - p1;
-					float4 width = float4(ab.y, ab.x, 0, 0);
-					width = normalize(width);
+					float4 width = float4(0, 0, 0, 0);
+					width = normalize(float4(ab.y, ab.x, 0, 0));
 
 					width.x /= (_ScreenParams.x / _ScreenParams.y);
 					pIN.position = p1 - width * size;

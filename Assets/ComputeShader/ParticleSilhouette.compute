@@ -16,9 +16,10 @@ Texture2D<float3> grayTexture;
 
 // Variables set from the CPU
 float deltaTime;
-int width;
-int height;
+uint width;
+uint height;
 float time;
+uint halfIndex;
 
 #define M_PI 3.14159265358979323846
 
@@ -50,13 +51,15 @@ float perlin(float2 p, float dim, float time) {
 [numthreads(1, 1, 1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-	float3 delta = float3((float(-width / 2) + id.x * 20) * 0.1f, (float(-height / 2) + id.y * 20) * 0.1f, 0) - particleBuffer[id.x + id.y * (width / 20)].position;
+	float3 delta = float3(float(-(int(width) / 2.0f) + float(id.x * 20.0f)) * 0.1f, (float(-(int(height)) / 2.0f) + float(id.y * 20.0f)) * 0.1f, 0) - particleBuffer[id.x + id.y * (width / 20)].position;
+	if (id.x + id.y * (width / 20) == halfIndex)
+		delta = -particleBuffer[halfIndex].position;
 	if (grayTexture[int2(id.x * 20, id.y * 20)].x > 0.2f)
 	{
 		float cosDeform = cos(time / 2);
 		float sinDeform = sin(time / 2) * sin(time / 2);
-		//delta = float3((float(-width / 2) + id.x * 20) * 0.1f, (float(-height / 2) + id.y * 20) * 0.1f, -(0.2126f * videoTexture[int2(id.x * 20, id.y * 20)].x + 0.7152f * videoTexture[int2(id.x * 20, id.y * 20)].y + 0.0722f * videoTexture[int2(id.x * 20, id.y * 20)].z) * grayTexture[int2(id.x * 20, id.y * 20)].x * 5) - particleBuffer[id.x + id.y * (width / 20)].position;
-		delta = float3((float(-width / 2) + id.x * 20) * 0.1f, (float(-height / 2) + id.y * 20) * 0.1f, -grayTexture[int2(id.x * 20, id.y * 20)].x * 5) - particleBuffer[id.x + id.y * (width / 20)].position;
+		//delta = float3((float(-width / 2) + float(id.x * 20)) * 0.1f, (float(-height / 2) + float(id.y * 20)) * 0.1f, -(0.2126f * videoTexture[int2(id.x * 20, id.y * 20)].x + 0.7152f * videoTexture[int2(id.x * 20, id.y * 20)].y + 0.0722f * videoTexture[int2(id.x * 20, id.y * 20)].z) * grayTexture[int2(id.x * 20, id.y * 20)].x * 5) - particleBuffer[id.x + id.y * (width / 20)].position;
+		delta = float3((float(-width / 2) + float(id.x * 20)) * 0.1f, (float(-height / 2) + float(id.y * 20)) * 0.1f, -grayTexture[int2(id.x * 20, id.y * 20)].x * 5) - particleBuffer[id.x + id.y * (width / 20)].position;
 		float3 dir = normalize(delta);
 		float sqlength = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
 
