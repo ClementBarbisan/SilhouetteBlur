@@ -48,7 +48,7 @@ float perlin(float2 p, float dim, float time) {
 	return center * 2.0 - 1.0;
 }
 
-[numthreads(1, 1, 1)]
+[numthreads(8, 8, 1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
 	float3 delta = float3(float(-(int(width) / 2.0f) + float(id.x * 20.0f)) * 0.1f, (float(-(int(height)) / 2.0f) + float(id.y * 20.0f)) * 0.1f, 0) - particleBuffer[id.x + id.y * (width / 20)].position;
