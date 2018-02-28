@@ -11,8 +11,7 @@ struct Particle
 // Particle's data, shared with the shader
 RWStructuredBuffer<Particle> particleBuffer;
 Texture2D<float3> grayTexture;
-Texture2D<float3> videoTexture;
-Texture2D<float3> deformTexture;
+//Texture2D<float3> videoTexture;
 //RWTexture2D<float4> outputTexture;
 
 // Variables set from the CPU
@@ -21,36 +20,64 @@ int width;
 int height;
 float time;
 
+#define M_PI 3.14159265358979323846
+
+float rand(float2 co) { return frac(sin(dot(co.xy, float2(12.9898, 78.233))) * 43758.5453); }
+float rand(float2 co, float l) { return rand(float2(rand(co), l)); }
+float rand(float2 co, float l, float t) { return rand(float2(rand(co, l), t)); }
+
+float perlin(float2 p, float dim, float time) {
+	float2 pos = floor(p * dim);
+	float2 posx = pos + float2(1.0, 0.0);
+	float2 posy = pos + float2(0.0, 1.0);
+	float2 posxy = pos + float2(1.0, 1.0);
+
+	float c = rand(pos, dim, time);
+	float cx = rand(posx, dim, time);
+	float cy = rand(posy, dim, time);
+	float cxy = rand(posxy, dim, time);
+
+	float2 d = frac(p * dim);
+	d = -0.5 * cos(d * M_PI) + 0.5;
+
+	float ccx = lerp(c, cx, d.x);
+	float cycxy = lerp(cy, cxy, d.x);
+	float center = lerp(ccx, cycxy, d.y);
+
+	return center * 2.0 - 1.0;
+}
+
 [numthreads(1, 1, 1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-	float3 delta = float3((float(-width / 2) + id.x * 10) * 0.1f, (float(-height / 2) + id.y * 10) * 0.1f, 0) - particleBuffer[id.x + id.y * (width / 10)].position;
-	if (grayTexture[int2(id.x * 10, id.y * 10)].x > 0.1f)
+	float3 delta = float3((float(-width / 2) + id.x * 20) * 0.1f, (float(-height / 2) + id.y * 20) * 0.1f, 0) - particleBuffer[id.x + id.y * (width / 20)].position;
+	if (grayTexture[int2(id.x * 20, id.y * 20)].x > 0.2f)
 	{
-		int cosDeform = cos(time) * 10;
-		int sinDeform = sin(time) * sin(time) * 10;
-		if (id.x * 10 + sinDeform >= 0 && id.x * 10 + sinDeform < width && id.y * 10 + cosDeform < height && id.y * 10 + cosDeform >= 0)
-			delta = float3((float(-width / 2) + id.x * 10) * 0.1f + deformTexture[int2(id.x * 10 + sinDeform, id.y * 10 + cosDeform)].x / 2, (float(-height / 2) + id.y * 10) * 0.1f + deformTexture[int2(id.x * 10 + sinDeform, id.y * 10 + cosDeform)].y / 2, -(0.2126f * videoTexture[int2(id.x * 10, id.y * 10)].x + 0.7152f * videoTexture[int2(id.x * 10, id.y * 10)].y + 0.0722f * videoTexture[int2(id.x * 10, id.y * 10)].z) * 5) - particleBuffer[id.x + id.y * (width / 10)].position;
-		else
-			delta = float3((float(-width / 2) + id.x * 10) * 0.1f, (float(-height / 2) + id.y * 10) * 0.1f, -(0.2126f * videoTexture[int2(id.x * 10, id.y * 10)].x + 0.7152f * videoTexture[int2(id.x * 10, id.y * 10)].y + 0.0722f * videoTexture[int2(id.x * 10, id.y * 10)].z) * 5) - particleBuffer[id.x + id.y * (width / 10)].position;
+		float cosDeform = cos(time / 2);
+		float sinDeform = sin(time / 2) * sin(time / 2);
+		//delta = float3((float(-width / 2) + id.x * 20) * 0.1f, (float(-height / 2) + id.y * 20) * 0.1f, -(0.2126f * videoTexture[int2(id.x * 20, id.y * 20)].x + 0.7152f * videoTexture[int2(id.x * 20, id.y * 20)].y + 0.0722f * videoTexture[int2(id.x * 20, id.y * 20)].z) * grayTexture[int2(id.x * 20, id.y * 20)].x * 5) - particleBuffer[id.x + id.y * (width / 20)].position;
+		delta = float3((float(-width / 2) + id.x * 20) * 0.1f, (float(-height / 2) + id.y * 20) * 0.1f, -grayTexture[int2(id.x * 20, id.y * 20)].x * 5) - particleBuffer[id.x + id.y * (width / 20)].position;
 		float3 dir = normalize(delta);
 		float sqlength = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
 
-		particleBuffer[id.x + id.y * (width / 10)].velocity = 0.5f * sqlength * dir;
-		particleBuffer[id.x + id.y * (width / 10)].position += particleBuffer[id.x + id.y * (width / 10)].velocity * deltaTime;
+		particleBuffer[id.x + id.y * (width / 20)].velocity += 0.1f * sqlength * dir;
+		particleBuffer[id.x + id.y * (width / 20)].velocity.x = perlin(float2((id.y * sinDeform), (id.y * cosDeform)), 0.25, 10);
+		particleBuffer[id.x + id.y * (width / 20)].velocity.y = perlin(float2((id.x * cosDeform), (id.x * sinDeform)), 0.25, 10);
+		particleBuffer[id.x + id.y * (width / 20)].velocity.z = clamp(particleBuffer[id.x + id.y * (width / 20)].velocity.z, -10, 10);
+		particleBuffer[id.x + id.y * (width / 20)].position += particleBuffer[id.x + id.y * (width / 20)].velocity * deltaTime;
 	}
 	else
 	{
 		float3 dir = normalize(delta);
 		float sqlength = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
 
-		particleBuffer[id.x + id.y * (width / 10)].velocity = 0.5f * sqlength * dir;
-		particleBuffer[id.x + id.y * (width / 10)].position += particleBuffer[id.x + id.y * (width / 10)].velocity * deltaTime;
+		particleBuffer[id.x + id.y * (width / 20)].velocity = 0.5f * sqlength * dir;
+		particleBuffer[id.x + id.y * (width / 20)].position += particleBuffer[id.x + id.y * (width / 20)].velocity * deltaTime;
 	}
 	
 	/*if (grayTexture[id.xy].x == 1.0f)
 	{
-		particleBuffer[id.x + id.y * width].position = float3(particleBuffer[id.x + id.y * width].initialPosition.xy, -(0.2126f * videoTexture[id.xy].x + 0.7152f * videoTexture[id.xy].y + 0.0722f * videoTexture[id.xy].z) * 10);
+		particleBuffer[id.x + id.y * width].position = float3(particleBuffer[id.x + id.y * width].initialPosition.xy, -(0.2126f * videoTexture[id.xy].x + 0.7152f * videoTexture[id.xy].y + 0.0722f * videoTexture[id.xy].z) * 20);
 	}
 	else
 	{

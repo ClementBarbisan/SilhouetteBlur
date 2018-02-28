@@ -15,8 +15,7 @@ Shader "Particle"
 	{
 		Pass 
 		{
-			Blend SrcAlpha one
-
+			Lighting Off
 			CGPROGRAM
 			#pragma target 5.0
 			
@@ -67,10 +66,12 @@ Shader "Particle"
 				return o;
 			}
 
-			[maxvertexcount(12)]
-			void geom(point PS_INPUT p[1], inout LineStream<PS_INPUT> triStream)
+			[maxvertexcount(24)]
+			void geom(point PS_INPUT p[1], inout TriangleStream<PS_INPUT> triStream)
 			{
 				float4 p1 = p[0].position;
+				
+				float size = 0.3f;
 				PS_INPUT pIN;
 				pIN.position = p1;
 				pIN.color = p[0].color;
@@ -78,18 +79,20 @@ Shader "Particle"
 				/*if (p[0].instance + 1 < _Width * _Height && (p[0].instance + 1) % _Width != 0)
 				{
 					float4 p2 = UnityObjectToClipPos(float4(particleBuffer[p[0].instance + 1].position, 1.0f));
+					float4 ab = p2 - p1;
+					float4 height = float4(ab.y, -ab.x, 0, 0);
+					height = normalize(height);
+
+					height.x /= (_ScreenParams.x / _ScreenParams.y);
 					
-					pIN.position = p1;
+					pIN.position = p1 - height * size;
 					triStream.Append(pIN);
-					pIN.position = p1 *(1 - 0.2) + p2 * 0.2;
+					pIN.position = p1 + height * size;
 					triStream.Append(pIN);
-					pIN.position = p1 *(1 - 0.4) + p2 * 0.4;
+					
+					pIN.position = p2 - height * size;
 					triStream.Append(pIN);
-					pIN.position = p1 *(1 - 0.6) + p2 * 0.6;
-					triStream.Append(pIN);
-					pIN.position = p1 *(1 - 0.8) + p2 * 0.8;
-					triStream.Append(pIN);
-					pIN.position = p2;
+					pIN.position = p2 + height * size;
 					triStream.Append(pIN);
 
 					triStream.RestartStrip();
@@ -97,78 +100,105 @@ Shader "Particle"
 				if (p[0].instance + _Width < _Width * _Height)
 				{
 					float4 p3 = UnityObjectToClipPos(float4(particleBuffer[p[0].instance + _Width].position, 1.0f));
-					pIN.position = p1;
-					triStream.Append(pIN);
+					float4 ab = p3 - p1;
+					float4 width = float4(ab.y, ab.x, 0, 0);
+					width = normalize(width);
 
-					pIN.position = p1 *(1 - 0.2) + p3 * 0.2;
+					width.x /= (_ScreenParams.x / _ScreenParams.y);
+					
+					pIN.position = p1 - width * size;
 					triStream.Append(pIN);
-					pIN.position = p1 *(1 - 0.4) + p3 * 0.4;
+					pIN.position = p1 + width * size;
 					triStream.Append(pIN);
-					pIN.position = p1 *(1 - 0.6) + p3 * 0.6;
+					
+					pIN.position = p3 - width * size;
 					triStream.Append(pIN);
-					pIN.position = p1 *(1 - 0.8) + p3 * 0.8;
-					triStream.Append(pIN);
-					pIN.position = p3;
+					pIN.position = p3 + width * size;
 					triStream.Append(pIN);
 				
 					triStream.RestartStrip();				
 				}*/
-				if (p[0].instance + 1 < _Width * _Height && (p[0].instance + 1) % _Width != 0)
+				if (p[0].instance + 1 < _Width * _Height && uint(p[0].instance + 1) % uint(_Width) != 0)
 				{
 					float4 p2 = UnityObjectToClipPos(float4(particleBuffer[p[0].instance + 1].position, 1.0f));
-					
-					pIN.position = p1;
-					triStream.Append(pIN);
+					float4 ab = p2 - p1;
+					float4 height = float4(ab.y, -ab.x, 0, 0);
+					height = normalize(height);
 
-					if (p[0].instance - 1 >= 0 && (p[0].instance) % (_Width) != 0)
+					height.x /= (_ScreenParams.x / _ScreenParams.y);
+					pIN.position = p1 - height * size;
+					triStream.Append(pIN);
+					pIN.position = p1 + height * size;
+					triStream.Append(pIN);
+					if (p[0].instance - 1 > 0 && uint(p[0].instance) % uint(_Width) != 0)
 					{
 						float4 p4 = UnityObjectToClipPos(float4(particleBuffer[p[0].instance - 1].position, 1.0f));
-						float4 pc = p4 * 0.25f + p1 * 0.5f + p2 * 0.25f;
+						float4 pc = p4 * 0.125f + p1 * 0.75f + p2 * 0.125f;
 						float4 tmpP1 = 2 * pc - p4 / 2 - p2 / 2;
 
-						pIN.position = p2 * (0.6 * 0.6) + tmpP1 * 2 * 0.6 *(1 - 0.6) + p4 * (1 - 0.6) * (1 - 0.6);
+						pIN.position = p2 * (0.6 * 0.6) + tmpP1 * 2 * 0.6 *(1 - 0.6) + p4 * (1 - 0.6) * (1 - 0.6) - height * size;
 						triStream.Append(pIN);
-
-						pIN.position = p2 * (0.7 * 0.7) + tmpP1 * 2 * 0.7 *(1 - 0.7) + p4 * (1 - 0.7) * (1 - 0.7);
+						pIN.position = p2 * (0.6 * 0.6) + tmpP1 * 2 * 0.6 *(1 - 0.6) + p4 * (1 - 0.6) * (1 - 0.6) + height * size;
 						triStream.Append(pIN);
-
-						pIN.position = p2 * (0.8 * 0.8) + tmpP1 * 2 * 0.8 *(1 - 0.8) + p4 * (1 - 0.8) * (1 - 0.8);
+						pIN.position = p2 * (0.7 * 0.7) + tmpP1 * 2 * 0.7 *(1 - 0.7) + p4 * (1 - 0.7) * (1 - 0.7) - height * size;
 						triStream.Append(pIN);
-
-						pIN.position = p2 * (0.9 * 0.9) + tmpP1 * 2 * 0.9 *(1 - 0.9) + p4 * (1 - 0.9) * (1 - 0.9);
+						pIN.position = p2 * (0.7 * 0.7) + tmpP1 * 2 * 0.7 *(1 - 0.7) + p4 * (1 - 0.7) * (1 - 0.7) + height * size;
+						triStream.Append(pIN);
+						pIN.position = p2 * (0.8 * 0.8) + tmpP1 * 2 * 0.8 *(1 - 0.8) + p4 * (1 - 0.8) * (1 - 0.8) - height * size;
+						triStream.Append(pIN);
+						pIN.position = p2 * (0.8 * 0.8) + tmpP1 * 2 * 0.8 *(1 - 0.8) + p4 * (1 - 0.8) * (1 - 0.8) + height * size;
+						triStream.Append(pIN);
+						pIN.position = p2 * (0.9 * 0.9) + tmpP1 * 2 * 0.9 *(1 - 0.9) + p4 * (1 - 0.9) * (1 - 0.9) - height * size;
+						triStream.Append(pIN);
+						pIN.position = p2 * (0.9 * 0.9) + tmpP1 * 2 * 0.9 *(1 - 0.9) + p4 * (1 - 0.9) * (1 - 0.9) + height * size;
 						triStream.Append(pIN);
 					}
-					pIN.position = p2;
-					pIN.instance = p[0].instance + 1;
+					pIN.position = p2 - height * size;
 					triStream.Append(pIN);
-
+					pIN.position = p2 + height * size;
+					triStream.Append(pIN);
 					triStream.RestartStrip();
 				}
 				if (p[0].instance + _Width < _Width * _Height)
 				{
 					float4 p3 = UnityObjectToClipPos(float4(particleBuffer[p[0].instance + _Width].position, 1.0f));
-					pIN.position = p1;
-					triStream.Append(pIN);
+					float4 ab = p3 - p1;
+					float4 width = float4(ab.y, ab.x, 0, 0);
+					width = normalize(width);
 
-					if (p[0].instance - _Width >= 0)
+					width.x /= (_ScreenParams.x / _ScreenParams.y);
+					pIN.position = p1 - width * size;
+					triStream.Append(pIN);
+					pIN.position = p1 + width * size;
+					triStream.Append(pIN);
+					if (p[0].instance - _Width > 0)
 					{
 						float4 p5 = UnityObjectToClipPos(float4(particleBuffer[p[0].instance - _Width].position, 1.0f));
-						float4 pc = p5 * 0.25f + p1 * 0.5f + p3 * 0.25f;
+						float4 pc = p5 * 0.125f + p1 * 0.75f + p3 * 0.125f;
 						float4 tmpP1 = 2 * pc - p5 / 2 - p3 / 2;
-						pIN.position = p3 * (0.6 * 0.6) + tmpP1 * 2 * 0.6 *(1 - 0.6) + p5 * (1 - 0.6) * (1 - 0.6);
+						pIN.position = p3 * (0.6 * 0.6) + tmpP1 * 2 * 0.6 *(1 - 0.6) + p5 * (1 - 0.6) * (1 - 0.6) - width * size;
+						triStream.Append(pIN);
+						pIN.position = p3 * (0.6 * 0.6) + tmpP1 * 2 * 0.6 *(1 - 0.6) + p5 * (1 - 0.6) * (1 - 0.6) + width * size;
 						triStream.Append(pIN);
 
-						pIN.position = p3 * (0.7 * 0.7) + tmpP1 * 2 * 0.7 *(1 - 0.7) + p5 * (1 - 0.7) * (1 - 0.7);
+						pIN.position = p3 * (0.7 * 0.7) + tmpP1 * 2 * 0.7 *(1 - 0.7) + p5 * (1 - 0.7) * (1 - 0.7) - width * size;
+						triStream.Append(pIN);
+						pIN.position = p3 * (0.7 * 0.7) + tmpP1 * 2 * 0.7 *(1 - 0.7) + p5 * (1 - 0.7) * (1 - 0.7) + width * size;
 						triStream.Append(pIN);
 
-						pIN.position = p3 * (0.8 * 0.8) + tmpP1 * 2 * 0.8 *(1 - 0.8) + p5 * (1 - 0.8) * (1 - 0.8);
+						pIN.position = p3 * (0.8 * 0.8) + tmpP1 * 2 * 0.8 *(1 - 0.8) + p5 * (1 - 0.8) * (1 - 0.8) - width * size;
+						triStream.Append(pIN);
+						pIN.position = p3 * (0.8 * 0.8) + tmpP1 * 2 * 0.8 *(1 - 0.8) + p5 * (1 - 0.8) * (1 - 0.8) + width * size;
 						triStream.Append(pIN);
 
-						pIN.position = p3 * (0.9 * 0.9) + tmpP1 * 2 * 0.9 *(1 - 0.9) + p5 * (1 - 0.9) * (1 - 0.9);
+						pIN.position = p3 * (0.9 * 0.9) + tmpP1 * 2 * 0.9 *(1 - 0.9) + p5 * (1 - 0.9) * (1 - 0.9) - width * size;
+						triStream.Append(pIN);
+						pIN.position = p3 * (0.9 * 0.9) + tmpP1 * 2 * 0.9 *(1 - 0.9) + p5 * (1 - 0.9) * (1 - 0.9) + width * size;
 						triStream.Append(pIN);
 					}
-					pIN.position = p3;
-					//pIN.instance = p[0].instance + _Width;
+					pIN.position = p3 - width * size;
+					triStream.Append(pIN);
+					pIN.position = p3 + width * size;
 					triStream.Append(pIN);
 				
 					triStream.RestartStrip();				
