@@ -139,7 +139,7 @@ public class MeshSilhouette : MonoBehaviour {
     void OnRenderObject()
     {
         material.SetPass(0);
-        Graphics.DrawProcedural(MeshTopology.Points, 1, resolution.x * resolution.y);
+        Graphics.DrawProcedural(MeshTopology.Points, 1, resolution.x / 20 * resolution.y / 20);
     }
 
     void OnDestroy()
