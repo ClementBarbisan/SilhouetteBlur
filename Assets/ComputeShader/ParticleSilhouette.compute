@@ -12,12 +12,14 @@ struct Particle
 RWStructuredBuffer<Particle> particleBuffer;
 Texture2D<float3> grayTexture;
 Texture2D<float3> videoTexture;
+Texture2D<float3> deformTexture;
 //RWTexture2D<float4> outputTexture;
 
 // Variables set from the CPU
 float deltaTime;
 int width;
 int height;
+float time;
 
 [numthreads(1, 1, 1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
@@ -25,11 +27,16 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 	float3 delta = float3((float(-width / 2) + id.x * 10) * 0.1f, (float(-height / 2) + id.y * 10) * 0.1f, 0) - particleBuffer[id.x + id.y * (width / 10)].position;
 	if (grayTexture[int2(id.x * 10, id.y * 10)].x > 0.1f)
 	{
-		delta = float3((float(-width / 2) + id.x * 10) * 0.1f, (float(-height / 2) + id.y * 10) * 0.1f, -(0.2126f * videoTexture[int2(id.x * 10, id.y * 10)].x + 0.7152f * videoTexture[int2(id.x * 10, id.y * 10)].y + 0.0722f * videoTexture[int2(id.x * 10, id.y * 10)].z) * 5) - particleBuffer[id.x + id.y * (width / 10)].position;
+		int cosDeform = cos(time) * 10;
+		int sinDeform = sin(time) * sin(time) * 10;
+		if (id.x * 10 + sinDeform >= 0 && id.x * 10 + sinDeform < width && id.y * 10 + cosDeform < height && id.y * 10 + cosDeform >= 0)
+			delta = float3((float(-width / 2) + id.x * 10) * 0.1f + deformTexture[int2(id.x * 10 + sinDeform, id.y * 10 + cosDeform)].x / 2, (float(-height / 2) + id.y * 10) * 0.1f + deformTexture[int2(id.x * 10 + sinDeform, id.y * 10 + cosDeform)].y / 2, -(0.2126f * videoTexture[int2(id.x * 10, id.y * 10)].x + 0.7152f * videoTexture[int2(id.x * 10, id.y * 10)].y + 0.0722f * videoTexture[int2(id.x * 10, id.y * 10)].z) * 5) - particleBuffer[id.x + id.y * (width / 10)].position;
+		else
+			delta = float3((float(-width / 2) + id.x * 10) * 0.1f, (float(-height / 2) + id.y * 10) * 0.1f, -(0.2126f * videoTexture[int2(id.x * 10, id.y * 10)].x + 0.7152f * videoTexture[int2(id.x * 10, id.y * 10)].y + 0.0722f * videoTexture[int2(id.x * 10, id.y * 10)].z) * 5) - particleBuffer[id.x + id.y * (width / 10)].position;
 		float3 dir = normalize(delta);
 		float sqlength = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
 
-		particleBuffer[id.x + id.y * (width / 10)].velocity += 0.2f * sqlength * dir;
+		particleBuffer[id.x + id.y * (width / 10)].velocity = 0.5f * sqlength * dir;
 		particleBuffer[id.x + id.y * (width / 10)].position += particleBuffer[id.x + id.y * (width / 10)].velocity * deltaTime;
 	}
 	else

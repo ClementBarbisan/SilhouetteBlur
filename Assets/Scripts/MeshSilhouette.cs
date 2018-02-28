@@ -16,6 +16,7 @@ public class MeshSilhouette : MonoBehaviour {
     public Material blurHorizontal;
     public Material blurVertical;
     public Vector2Int canny;
+    public Texture2D deformationTexture;
     public int blurIntensity = 5;
     private Texture2D texture;
     private Texture2D grayTex;
@@ -87,8 +88,9 @@ public class MeshSilhouette : MonoBehaviour {
         computeShader.SetBuffer(mComputeShaderKernelID, "particleBuffer", particleBuffer);
         computeShader.SetTexture(mComputeShaderKernelID, "grayTexture", renderTexture2);
         computeShader.SetTexture(mComputeShaderKernelID, "videoTexture", texture);
+        computeShader.SetTexture(mComputeShaderKernelID, "deformTexture", deformationTexture);
         //computeShader.SetTexture(mComputeShaderKernelID, "outputTexture", outputTexture);
-       
+
         material.SetBuffer("particleBuffer", particleBuffer);
         material.SetInt("_Width", width / 10);
         material.SetInt("_Height", height / 10);
@@ -119,7 +121,7 @@ public class MeshSilhouette : MonoBehaviour {
             texture.Apply();
         }
         computeShader.SetFloat("deltaTime", Time.deltaTime);
-       
+        computeShader.SetFloat("time", Time.time);
         computeShader.Dispatch(mComputeShaderKernelID, resolution.x / 10, resolution.y / 10, 1);
     }
 
