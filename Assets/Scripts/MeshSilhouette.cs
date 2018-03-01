@@ -133,7 +133,7 @@ public class MeshSilhouette : MonoBehaviour {
         //}
         computeShader.SetFloat("deltaTime", Time.deltaTime);
         computeShader.SetFloat("time", Time.time);
-        computeShader.Dispatch(mComputeShaderKernelID, resolution.x / 20 / 8, resolution.y / 20 / 8, 1);
+        computeShader.Dispatch(mComputeShaderKernelID, resolution.x / 20 / 6, resolution.y / 20 / 6, 1);
     }
 
     void OnRenderObject()

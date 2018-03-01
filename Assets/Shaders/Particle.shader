@@ -6,15 +6,17 @@ Shader "Particle"
 {
 	Properties
 	{
-		_ColorLow ("Color Slow Speed", Color) = (0, 0, 0.5, 0.3)
-		_ColorHigh ("Color High Speed", Color) = (1, 0, 0, 0.3)
-		_HighSpeedValue ("High speed Value", Range(0, 50)) = 25
+		_Color ("Color", Color) = (0.75, 0.75, 0.75, 1.0)
 	}
 
 	SubShader 
 	{
 		Pass 
 		{
+			Tags{ "Queue" = "Transparent" "RenderType" = "Transparent" }
+			LOD 100
+			ZWrite Off
+			Blend SrcAlpha OneMinusSrcAlpha
 			Lighting Off
 			CGPROGRAM
 			#pragma target 5.0
@@ -36,7 +38,7 @@ Shader "Particle"
 			struct PS_INPUT
 			{
 				float4 position : SV_POSITION;
-				float4 color : COLOR;
+				//float4 color : COLOR;
 				int instance : SV_InstanceID;
 			};
 			
@@ -44,9 +46,7 @@ Shader "Particle"
 			StructuredBuffer<Particle> particleBuffer;
 			
 			// Properties variables
-			uniform float4 _ColorLow;
-			uniform float4 _ColorHigh;
-			uniform float _HighSpeedValue;
+			uniform float4 _Color;
 			uniform int _Width;
 			uniform int _Height;
 			
@@ -56,9 +56,7 @@ Shader "Particle"
 				PS_INPUT o = (PS_INPUT)0;
 
 				// Color
-				float speed = length(particleBuffer[instance_id].velocity);
-				float lerpValue = clamp(speed / _HighSpeedValue, 0.0f, 1.0f);
-				o.color = lerp(_ColorLow, _ColorHigh, lerpValue);
+				//o.color = _ColorHigh;
 
 				// Position
 				o.position = UnityObjectToClipPos(float4(particleBuffer[instance_id].position, 1.0f));
@@ -74,7 +72,7 @@ Shader "Particle"
 				float size = 0.3f;
 				PS_INPUT pIN;
 				pIN.position = p1;
-				pIN.color = p[0].color;
+				//pIN.color = p[0].color;
 				pIN.instance = 0;
 				/*if (p[0].instance + 1 < _Width * _Height && (p[0].instance + 1) % _Width != 0)
 				{
@@ -136,23 +134,32 @@ Shader "Particle"
 						float4 pc = p4 * 0.125f + p1 * 0.75f + p2 * 0.125f;
 						float4 tmpP1 = 2 * pc - p4 / 2 - p2 / 2;
 
-						pIN.position = p2 * (0.6 * 0.6) + tmpP1 * 2 * 0.6 *(1 - 0.6) + p4 * (1 - 0.6) * (1 - 0.6) - height * size;
+						float4 tmpPos = p2 * (0.6 * 0.6) + tmpP1 * 2 * 0.6 *(1 - 0.6) + p4 * (1 - 0.6) * (1 - 0.6);
+						//pIN.color = _ColorHigh * (-tmpPos.z + 0.1f);
+						pIN.position = tmpPos - height * size;
 						triStream.Append(pIN);
-						pIN.position = p2 * (0.6 * 0.6) + tmpP1 * 2 * 0.6 *(1 - 0.6) + p4 * (1 - 0.6) * (1 - 0.6) + height * size;
+						pIN.position = tmpPos + height * size;
 						triStream.Append(pIN);
-						pIN.position = p2 * (0.7 * 0.7) + tmpP1 * 2 * 0.7 *(1 - 0.7) + p4 * (1 - 0.7) * (1 - 0.7) - height * size;
+						tmpPos = p2 * (0.7 * 0.7) + tmpP1 * 2 * 0.7 *(1 - 0.7) + p4 * (1 - 0.7) * (1 - 0.7);
+						//pIN.color = _ColorHigh * (-tmpPos.z + 0.1f);
+						pIN.position = tmpPos - height * size;
 						triStream.Append(pIN);
-						pIN.position = p2 * (0.7 * 0.7) + tmpP1 * 2 * 0.7 *(1 - 0.7) + p4 * (1 - 0.7) * (1 - 0.7) + height * size;
+						pIN.position = tmpPos + height * size;
 						triStream.Append(pIN);
-						pIN.position = p2 * (0.8 * 0.8) + tmpP1 * 2 * 0.8 *(1 - 0.8) + p4 * (1 - 0.8) * (1 - 0.8) - height * size;
+						tmpPos = p2 * (0.8 * 0.8) + tmpP1 * 2 * 0.8 *(1 - 0.8) + p4 * (1 - 0.8) * (1 - 0.8);
+						//pIN.color = _ColorHigh * (-tmpPos.z + 0.1f);
+						pIN.position = tmpPos - height * size;
 						triStream.Append(pIN);
-						pIN.position = p2 * (0.8 * 0.8) + tmpP1 * 2 * 0.8 *(1 - 0.8) + p4 * (1 - 0.8) * (1 - 0.8) + height * size;
+						pIN.position = tmpPos + height * size;
 						triStream.Append(pIN);
-						pIN.position = p2 * (0.9 * 0.9) + tmpP1 * 2 * 0.9 *(1 - 0.9) + p4 * (1 - 0.9) * (1 - 0.9) - height * size;
+						tmpPos = p2 * (0.9 * 0.9) + tmpP1 * 2 * 0.9 *(1 - 0.9) + p4 * (1 - 0.9) * (1 - 0.9);
+						//pIN.color = _ColorHigh * (-tmpPos.z + 0.1f);
+						pIN.position =  tmpPos - height * size;
 						triStream.Append(pIN);
-						pIN.position = p2 * (0.9 * 0.9) + tmpP1 * 2 * 0.9 *(1 - 0.9) + p4 * (1 - 0.9) * (1 - 0.9) + height * size;
+						pIN.position = tmpPos + height * size;
 						triStream.Append(pIN);
 					}
+					//pIN.color = _ColorHigh * (-p2.z / p2.w + 0.1f);
 					pIN.position = p2 - height * size;
 					triStream.Append(pIN);
 					pIN.position = p2 + height * size;
@@ -167,6 +174,7 @@ Shader "Particle"
 					width = normalize(float4(ab.y, ab.x, 0, 0));
 
 					width.x /= (_ScreenParams.x / _ScreenParams.y);
+					//pIN.color = p[0].color;
 					pIN.position = p1 - width * size;
 					triStream.Append(pIN);
 					pIN.position = p1 + width * size;
@@ -176,26 +184,34 @@ Shader "Particle"
 						float4 p5 = UnityObjectToClipPos(float4(particleBuffer[p[0].instance - _Width].position, 1.0f));
 						float4 pc = p5 * 0.125f + p1 * 0.75f + p3 * 0.125f;
 						float4 tmpP1 = 2 * pc - p5 / 2 - p3 / 2;
-						pIN.position = p3 * (0.6 * 0.6) + tmpP1 * 2 * 0.6 *(1 - 0.6) + p5 * (1 - 0.6) * (1 - 0.6) - width * size;
-						triStream.Append(pIN);
-						pIN.position = p3 * (0.6 * 0.6) + tmpP1 * 2 * 0.6 *(1 - 0.6) + p5 * (1 - 0.6) * (1 - 0.6) + width * size;
-						triStream.Append(pIN);
 
-						pIN.position = p3 * (0.7 * 0.7) + tmpP1 * 2 * 0.7 *(1 - 0.7) + p5 * (1 - 0.7) * (1 - 0.7) - width * size;
+						float4 tmpPos = p3 * (0.6 * 0.6) + tmpP1 * 2 * 0.6 *(1 - 0.6) + p5 * (1 - 0.6) * (1 - 0.6);
+						//pIN.color = _ColorHigh * (-tmpPos.z + 0.1f);
+						pIN.position = tmpPos - width * size;
 						triStream.Append(pIN);
-						pIN.position = p3 * (0.7 * 0.7) + tmpP1 * 2 * 0.7 *(1 - 0.7) + p5 * (1 - 0.7) * (1 - 0.7) + width * size;
+						pIN.position = tmpPos + width * size;
 						triStream.Append(pIN);
-
-						pIN.position = p3 * (0.8 * 0.8) + tmpP1 * 2 * 0.8 *(1 - 0.8) + p5 * (1 - 0.8) * (1 - 0.8) - width * size;
+						tmpPos = p3 * (0.7 * 0.7) + tmpP1 * 2 * 0.7 *(1 - 0.7) + p5 * (1 - 0.7) * (1 - 0.7);
+						//pIN.color = _ColorHigh * (-tmpPos.z + 0.1f);
+						pIN.position = tmpPos - width * size;
 						triStream.Append(pIN);
-						pIN.position = p3 * (0.8 * 0.8) + tmpP1 * 2 * 0.8 *(1 - 0.8) + p5 * (1 - 0.8) * (1 - 0.8) + width * size;
+						pIN.position = tmpPos + width * size;
 						triStream.Append(pIN);
-
-						pIN.position = p3 * (0.9 * 0.9) + tmpP1 * 2 * 0.9 *(1 - 0.9) + p5 * (1 - 0.9) * (1 - 0.9) - width * size;
+						tmpPos = p3 * (0.8 * 0.8) + tmpP1 * 2 * 0.8 *(1 - 0.8) + p5 * (1 - 0.8) * (1 - 0.8);
+						//pIN.color = _ColorHigh * (-tmpPos.z + 0.1f);
+						pIN.position = tmpPos - width * size;
 						triStream.Append(pIN);
-						pIN.position = p3 * (0.9 * 0.9) + tmpP1 * 2 * 0.9 *(1 - 0.9) + p5 * (1 - 0.9) * (1 - 0.9) + width * size;
+						pIN.position = tmpPos + width * size;
+						triStream.Append(pIN);
+						tmpPos = p3 * (0.9 * 0.9) + tmpP1 * 2 * 0.9 *(1 - 0.9) + p5 * (1 - 0.9) * (1 - 0.9);
+						//pIN.color = _ColorHigh * (-tmpPos.z + 0.1f);
+						pIN.position = tmpPos - width * size;
+						triStream.Append(pIN);
+						pIN.position = tmpPos + width * size;
 						triStream.Append(pIN);
 					}
+
+					//pIN.color = _ColorHigh * (-p3.z / p3.w + 0.1f);
 					pIN.position = p3 - width * size;
 					triStream.Append(pIN);
 					pIN.position = p3 + width * size;
@@ -209,7 +225,8 @@ Shader "Particle"
 			// Pixel shader
 			float4 frag(PS_INPUT i) : COLOR
 			{
-				return i.color;
+				float4 position = normalize(i.position);
+				return (float4(_Color.xyz * (1.0f - (position.z * 2000.0f / position.w) + 0.1f), 1.0f));
 			}
 			
 			ENDCG
