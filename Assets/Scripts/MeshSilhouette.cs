@@ -27,6 +27,8 @@ public class MeshSilhouette : MonoBehaviour {
     private Vector2Int resolution;
     private byte[] returnedResultGray;
     private byte[] returnedResultVideo;
+    public float updateTime = 0.5f;
+    private float timeElapsed = 0;
     private void OnValidate()
     {
         canny = new Vector2Int(Mathf.Clamp(canny.x, 0, 255), Mathf.Clamp(canny.y, 75, 255));
@@ -111,29 +113,34 @@ public class MeshSilhouette : MonoBehaviour {
         blurVertical.SetInt("_Size", blurIntensity);
     }
 
+
     // Update is called once per frame
     void Update () {
-
-        OpenCVInterop.UpdateFrame();
-        IntPtr returnedPtrGray = OpenCVInterop.DetectSilhouette(canny.x, canny.y);
-        if (returnedPtrGray != IntPtr.Zero)
+        timeElapsed += Time.deltaTime;
+        if (timeElapsed > updateTime)
         {
-            Marshal.Copy(returnedPtrGray, returnedResultGray, 0, resolution.x * resolution.y * 3);
-            grayTex.LoadRawTextureData(returnedResultGray);
-            grayTex.Apply();
-            Graphics.Blit(grayTex, renderTexture1, blurHorizontal);
-            Graphics.Blit(renderTexture1, renderTexture2, blurVertical);
+            timeElapsed = 0;
+            OpenCVInterop.UpdateFrame();
         }
-        //IntPtr returnedPtrVideo = OpenCVInterop.GetCurrentFrame();
-        //if (returnedPtrVideo != IntPtr.Zero)
-        //{
-        //    Marshal.Copy(returnedPtrVideo, returnedResultVideo, 0, resolution.x * resolution.y * 3);
-        //    texture.LoadRawTextureData(returnedResultVideo);
-        //    texture.Apply();
-        //}
-        computeShader.SetFloat("deltaTime", Time.deltaTime);
-        computeShader.SetFloat("time", Time.time);
-        computeShader.Dispatch(mComputeShaderKernelID, resolution.x / 20 / 6, resolution.y / 20 / 6, 1);
+            IntPtr returnedPtrGray = OpenCVInterop.DetectSilhouette(canny.x, canny.y);
+            if (returnedPtrGray != IntPtr.Zero)
+            {
+                Marshal.Copy(returnedPtrGray, returnedResultGray, 0, resolution.x * resolution.y * 3);
+                grayTex.LoadRawTextureData(returnedResultGray);
+                grayTex.Apply();
+                Graphics.Blit(grayTex, renderTexture1, blurHorizontal);
+                Graphics.Blit(renderTexture1, renderTexture2, blurVertical);
+            }
+            //IntPtr returnedPtrVideo = OpenCVInterop.GetCurrentFrame();
+            //if (returnedPtrVideo != IntPtr.Zero)
+            //{
+            //    Marshal.Copy(returnedPtrVideo, returnedResultVideo, 0, resolution.x * resolution.y * 3);
+            //    texture.LoadRawTextureData(returnedResultVideo);
+            //    texture.Apply();
+            //}
+            computeShader.SetFloat("deltaTime", Time.deltaTime);
+            computeShader.SetFloat("time", Time.time);
+            computeShader.Dispatch(mComputeShaderKernelID, resolution.x / 20 / 6, resolution.y / 20 / 6, 1);
     }
 
     void OnRenderObject()
