@@ -48,33 +48,35 @@ float perlin(float2 p, float dim, float time) {
 	return center * 2.0 - 1.0;
 }
 
-[numthreads(6, 6, 1)]
+[numthreads(16, 16, 1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-	float3 delta = float3((float(-(int(width)) / 2.0f) + float(id.x * 20.0f)) * 0.1f, (float(-(int(height)) / 2.0f) + float(id.y * 20.0f)) * 0.1f, 0) - particleBuffer[id.x + id.y * (width / 20)].position;
-	if (id.x + id.y * (width / 20) == halfIndex)
-		delta = -particleBuffer[halfIndex].position;
+	//if (id.x + id.y * (width / 20) == halfIndex)
+		//delta = -particleBuffer[halfIndex].position;
 	if (grayTexture[int2(id.x * 20, id.y * 20)].x > 0.2f)
 	{
 		float cosDeform = cos(time);
 		float sinDeform = sin(time) * sin(time);
 		//delta = float3((float(-width / 2) + float(id.x * 20)) * 0.1f, (float(-height / 2) + float(id.y * 20)) * 0.1f, -(0.2126f * videoTexture[int2(id.x * 20, id.y * 20)].x + 0.7152f * videoTexture[int2(id.x * 20, id.y * 20)].y + 0.0722f * videoTexture[int2(id.x * 20, id.y * 20)].z) * grayTexture[int2(id.x * 20, id.y * 20)].x * 5) - particleBuffer[id.x + id.y * (width / 20)].position;
-		delta = float3((float(-(int(width)) / 2.0f) + float(id.x * 20.0f)) * 0.1f, (float(-(int(height)) / 2.0f) + float(id.y * 20.0f)) * 0.1f, -grayTexture[int2(id.x * 20, id.y * 20)].x * 5) - particleBuffer[id.x + id.y * (width / 20)].position;
-		float3 dir = normalize(delta);
-		float sqlength = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+		//float3 delta = float3((float(-(int(width)) / 2.0f) + float(id.x * 20.0f)) * 0.1f, (float(-(int(height)) / 2.0f) + float(id.y * 20.0f)) * 0.1f, -grayTexture[int2(id.x * 20, id.y * 20)].x * 5) - particleBuffer[id.x + id.y * (width / 20)].position;
+		float deltaZ = (-grayTexture[int2(id.x * 20, id.y * 20)].x * 10) - particleBuffer[id.x + id.y * (width / 20)].position.z;
+		//float3 dir = normalize(delta);
+		//float sqlength = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
 
-		particleBuffer[id.x + id.y * (width / 20)].velocity += 0.1f * sqlength * dir;
-		particleBuffer[id.x + id.y * (width / 20)].velocity.x = perlin(float2((id.y * sinDeform), (id.y * cosDeform)), 0.25, 0) * 2;
-		particleBuffer[id.x + id.y * (width / 20)].velocity.y = perlin(float2((id.x * cosDeform), (id.x * sinDeform)), 0.25, 0) * 2;
-		particleBuffer[id.x + id.y * (width / 20)].velocity.z = clamp(particleBuffer[id.x + id.y * (width / 20)].velocity.z, -10, 10);
+		//particleBuffer[id.x + id.y * (width / 20)].velocity += 0.1f * sqlength * dir;
+		//particleBuffer[id.x + id.y * (width / 20)].velocity.x += perlin(float2((id.y * sinDeform), (id.y * cosDeform)), 0.25, 0) / 1000;
+		//particleBuffer[id.x + id.y * (width / 20)].velocity.y += perlin(float2((id.x * cosDeform), (id.x * sinDeform)), 0.25, 0) / 1000;
+		particleBuffer[id.x + id.y * (width / 20)].velocity.z = clamp(deltaZ, -10, 10);
 		particleBuffer[id.x + id.y * (width / 20)].position += particleBuffer[id.x + id.y * (width / 20)].velocity * deltaTime;
 	}
 	else
 	{
-		float3 dir = normalize(delta);
-		float sqlength = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+		//float3 delta = float3((float(-(int(width)) / 2.0f) + float(id.x * 20.0f)) * 0.1f, (float(-(int(height)) / 2.0f) + float(id.y * 20.0f)) * 0.1f, 0) - particleBuffer[id.x + id.y * (width / 20)].position;
+		//float3 dir = normalize(delta);
+		//float sqlength = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
 
-		particleBuffer[id.x + id.y * (width / 20)].velocity = 0.5f * sqlength * dir;
+		//particleBuffer[id.x + id.y * (width / 20)].velocity = 0.5f * sqlength * dir;
+		particleBuffer[id.x + id.y * (width / 20)].velocity.z = -(particleBuffer[id.x + id.y * (width / 20)].position).z * 2;
 		particleBuffer[id.x + id.y * (width / 20)].position += particleBuffer[id.x + id.y * (width / 20)].velocity * deltaTime;
 	}
 	

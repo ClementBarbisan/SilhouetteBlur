@@ -26,7 +26,7 @@ public class MeshSilhouette : MonoBehaviour {
     //private RenderTexture outputTexture;
     private Vector2Int resolution;
     private byte[] returnedResultGray;
-    private byte[] returnedResultVideo;
+    //private byte[] returnedResultVideo;
     public float updateTime = 0.5f;
     private float timeElapsed = 0;
     private void OnValidate()
@@ -57,7 +57,7 @@ public class MeshSilhouette : MonoBehaviour {
         //outputTexture.enableRandomWrite = true;
         //outputTexture.Create();
         returnedResultGray = new byte[resolution.x * resolution.y * 3];
-        returnedResultVideo = new byte[resolution.x * resolution.y * 3];
+        //returnedResultVideo = new byte[resolution.x * resolution.y * 3];
         renderTexture1 = new RenderTexture(resolution.x, resolution.y, 0, RenderTextureFormat.ARGB32);
         renderTexture1.Create();
         renderTexture2 = new RenderTexture(resolution.x, resolution.y, 0, RenderTextureFormat.ARGB32);
@@ -140,13 +140,13 @@ public class MeshSilhouette : MonoBehaviour {
             //}
             computeShader.SetFloat("deltaTime", Time.deltaTime);
             computeShader.SetFloat("time", Time.time);
-            computeShader.Dispatch(mComputeShaderKernelID, resolution.x / 20 / 6, resolution.y / 20 / 6, 1);
+            computeShader.Dispatch(mComputeShaderKernelID, resolution.x / 20 / 16, resolution.y / 20 / 16, 1);
     }
 
     void OnRenderObject()
     {
         material.SetPass(0);
-        Graphics.DrawProcedural(MeshTopology.Points, 1, resolution.x / 20 * resolution.y / 20);
+        Graphics.DrawProcedural(MeshTopology.Points, 1, (resolution.x / 20) * (resolution.y / 20));
     }
 
     void OnDestroy()

@@ -56,7 +56,7 @@
 				UNITY_SETUP_INSTANCE_ID(v);
 				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
 #if !defined(SHADER_API_OPENGL)
-				if (tex2Dlod(_GrayTex, float4(o.uv, 0, 0)).x == 1)
+				if (tex2Dlod(_GrayTex, float4(o.uv, 0, 0)).x > 0.1)
 				{
 					float4 rgba = tex2Dlod(_StreamTex, float4(o.uv, 0, 0));
 					v.vertex.y += 0.2126 * rgba.x + 0.7152 * rgba.y + 0.0722 * rgba.z;
