@@ -37,7 +37,10 @@ public class MeshSilhouette : MonoBehaviour {
         blurVertical.SetInt("_Size", blurIntensity);
     }
     // Use this for initialization
-    void Awake () {
+    void Awake ()
+    {
+        QualitySettings.vSyncCount = 2;
+        Application.targetFrameRate = 60;
         int width = 0;
         int height = 0;
         int result = OpenCVInterop.InitSilhouette(ref width, ref height);
@@ -146,7 +149,7 @@ public class MeshSilhouette : MonoBehaviour {
     void OnRenderObject()
     {
         material.SetPass(0);
-        Graphics.DrawProcedural(MeshTopology.Points, 1, (resolution.x / 20) * (resolution.y / 20));
+        Graphics.DrawProceduralNow(MeshTopology.Points, 1, (resolution.x / 20) * (resolution.y / 20));
     }
 
     void OnDestroy()

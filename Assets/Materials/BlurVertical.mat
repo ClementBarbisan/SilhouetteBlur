@@ -4,8 +4,9 @@
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_Name: BlurVertical
   m_Shader: {fileID: 4800000, guid: ebc9bd774bae4b942b1672615112bbb4, type: 3}
   m_ShaderKeywords: 
@@ -66,7 +67,7 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _Resolution: 360
+    - _Resolution: 480
     - _Size: 10
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
